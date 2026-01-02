@@ -4,4 +4,5 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [vike(), react()],
+  base: "/SignWord/",
 });
