@@ -1,10 +1,16 @@
 import { useMemo, useState } from "react";
-import { useData } from "vike-react/useData";
-import type { Data } from "./+data";
+import type { SignWordEntry } from "../../lib/signwordData";
 import { Link } from "../../components/Link";
 
-export default function Page() {
-  const { entries, errorMessage } = useData<Data>();
+export default function Page({
+  entries,
+  errorMessage,
+  loading,
+}: {
+  entries: SignWordEntry[];
+  errorMessage: string | null;
+  loading: boolean;
+}) {
   const [search, setSearch] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
@@ -57,6 +63,9 @@ export default function Page() {
         <h1>수어 단어장</h1>
         <p>구글시트에 등록한 단어와 수어 영상을 검색하고 재생할 수 있는 단어장입니다.</p>
       </div>
+      {loading && !errorMessage && (
+        <div style={{ fontSize: 14, color: "#555" }}>단어 목록을 불러오는 중입니다...</div>
+      )}
       {errorMessage && (
         <div
           style={{

@@ -1,10 +1,16 @@
 import { useState, useMemo } from "react";
-import { useData } from "vike-react/useData";
-import type { Data } from "./+data";
+import type { SignWordEntry } from "../../../lib/signwordData";
 import { Link } from "../../../components/Link";
 
-export default function Page() {
-  const { entry, errorMessage } = useData<Data>();
+export default function Page({
+  entry,
+  errorMessage,
+  loading,
+}: {
+  entry: SignWordEntry | undefined;
+  errorMessage: string | null;
+  loading: boolean;
+}) {
 
   const [selectedVideoId, setSelectedVideoId] = useState(
     entry ? entry.wordVideos[0]?.id || entry.sentenceVideos[0]?.id || "" : "",
@@ -19,6 +25,17 @@ export default function Page() {
       entry.sentenceVideos.find((video) => video.id === selectedVideoId)
     );
   }, [entry, selectedVideoId]);
+
+  if (!entry && loading) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <h1>단어를 불러오는 중입니다</h1>
+        <div>
+          <Link href="/">단어 목록으로 돌아가기</Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!entry && errorMessage) {
     return (

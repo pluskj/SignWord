@@ -2,7 +2,6 @@ import "./Layout.css";
 import { useState } from "react";
 import logoUrl from "../assets/logo.svg";
 import { Link } from "../components/Link";
-import { GOOGLE_SHEET_URL, GOOGLE_DRIVE_FOLDER_URL } from "../lib/signwordConfig";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,13 +19,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <Logo />
         <Link href="/">수어 단어장</Link>
-        <Link href="/admin">단어·영상 추가</Link>
-        <a href={GOOGLE_SHEET_URL} target="_blank" rel="noreferrer">
-          단어 데이터 시트 열기
-        </a>
-        <a href={GOOGLE_DRIVE_FOLDER_URL} target="_blank" rel="noreferrer">
-          수어 영상 드라이브 열기
-        </a>
       </Sidebar>
       <Content
         onToggleSidebar={() => setSidebarOpen((open) => !open)}

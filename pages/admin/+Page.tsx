@@ -1,15 +1,50 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useData } from "vike-react/useData";
-import type { Data } from "./+data";
+import type { SignWordEntry } from "../../lib/signwordData";
 import { createWord, createVideo, uploadVideoFile } from "../../lib/signwordApi";
+import { GOOGLE_DRIVE_FOLDER_URL, GOOGLE_SHEET_URL } from "../../lib/signwordConfig";
 
 function generateId(prefix: string) {
   const now = Date.now().toString(36);
   return `${prefix}${now}`;
 }
 
-export default function Page() {
-  const { entries, errorMessage } = useData<Data>();
+export default function Page({
+  entries,
+  errorMessage,
+  loading,
+}: {
+  entries: SignWordEntry[];
+  errorMessage: string | null;
+  loading: boolean;
+}) {
+  const [isAuthorized, setIsAuthorized] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    return window.localStorage.getItem("signword_admin_authenticated") === "1";
+  });
+  const [passwordInput, setPasswordInput] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  function handleLoginSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const expectedPassword = "signword-admin";
+    if (!passwordInput) {
+      setLoginError("비밀번호를 입력하세요.");
+      return;
+    }
+    if (passwordInput !== expectedPassword) {
+      setLoginError("비밀번호가 올바르지 않습니다.");
+      return;
+    }
+    setIsAuthorized(true);
+    setPasswordInput("");
+    setLoginError("");
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("signword_admin_authenticated", "1");
+    }
+  }
+
   const [wordEntries, setWordEntries] = useState(entries);
   const [wordSearch, setWordSearch] = useState("");
 
@@ -267,6 +302,67 @@ export default function Page() {
     video.play();
   }
 
+  if (!isAuthorized) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          maxWidth: 400,
+        }}
+      >
+        <h1>관리자 로그인</h1>
+        <p style={{ fontSize: 14, color: "#555" }}>
+          이 페이지는 단어와 수어 영상을 관리하는 관리자 전용 화면입니다.
+        </p>
+        <form
+          onSubmit={handleLoginSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: 12 }}
+        >
+          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span>관리자 비밀번호</span>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(event) => {
+                setPasswordInput(event.target.value);
+                if (loginError) {
+                  setLoginError("");
+                }
+              }}
+            />
+          </label>
+          <button
+            type="submit"
+            style={{
+              marginTop: 4,
+              padding: "8px 12px",
+              borderRadius: 4,
+              border: "1px solid #1976d2",
+              backgroundColor: "#1976d2",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            로그인
+          </button>
+        </form>
+        {loginError && (
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 13,
+              color: "red",
+            }}
+          >
+            {loginError}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       <div>
@@ -275,6 +371,37 @@ export default function Page() {
           구글시트와 연결된 단어와 영상을 이 화면에서 추가할 수 있습니다.
         </p>
       </div>
+
+      <section
+        style={{
+          border: "1px solid #eee",
+          borderRadius: 8,
+          padding: 16,
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        <h2>관리 도구</h2>
+        <p style={{ fontSize: 13, color: "#555" }}>
+          단어 데이터와 수어 영상이 저장된 구글드라이브 폴더를 바로 열 수 있습니다.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            marginTop: 4,
+          }}
+        >
+          <a href={GOOGLE_SHEET_URL} target="_blank" rel="noreferrer">
+            단어 데이터 시트 열기
+          </a>
+          <a href={GOOGLE_DRIVE_FOLDER_URL} target="_blank" rel="noreferrer">
+            수어 영상 드라이브 열기
+          </a>
+        </div>
+      </section>
 
       {errorMessage && (
         <div
