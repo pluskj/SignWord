@@ -98,7 +98,7 @@ function Logo() {
         marginBottom: 10,
       }}
     >
-      <a href="/">
+      <a href="#/">
         <img src={logoUrl} height={64} width={64} alt="logo" />
       </a>
       <div
